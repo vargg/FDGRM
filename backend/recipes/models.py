@@ -19,6 +19,9 @@ class Tag(models.Model):
         verbose_name='Ссылка',
     )
 
+    class Meta:
+        ordering = ('name', )
+
     def __repr__(self):
         return (
             f'{self.__class__.__name__}(name={self.name}, '
@@ -26,10 +29,7 @@ class Tag(models.Model):
         )
 
     def __str__(self):
-        return f'{self.__class__.__name__} "{self.name}"'
-
-    class Meta:
-        ordering = ('name', )
+        return f'Тэг "{self.name}"'
 
 
 class Ingredient(models.Model):
@@ -43,16 +43,17 @@ class Ingredient(models.Model):
         verbose_name='Единицы измерения',
     )
 
+    class Meta:
+        ordering = ('name', )
+
     def __repr__(self):
         return (
-            f'{self.__class__.__name__}(name={self.name}, measurement_unit={self.measurement_unit})'
+            f'{self.__class__.__name__}(name={self.name}, '
+            f'measurement_unit={self.measurement_unit}.'
         )
 
     def __str__(self):
-        return f'{self.__class__.__name__} "{self.name}"'
-
-    class Meta:
-        ordering = ('name', )
+        return f'Ингредиент "{self.name}"'
 
 
 class IngredientInRecipe (models.Model):
@@ -114,7 +115,8 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тэг',
-        help_text='Нужно указать хотя бы один тэг'
+        help_text='Нужно указать хотя бы один тэг',
+        related_name='recipe',
     )
     created = models.DateTimeField(
         auto_now_add=True,
@@ -134,4 +136,74 @@ class Recipe(models.Model):
         )
 
     def __str__(self):
-        return f'{self.__class__.__name__} "{self.name}"'
+        return f'Рецепт "{self.name}"'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Рецепт',
+    )
+    date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добавления',
+    )
+
+    class Meta:
+        ordering = ['date']
+        verbose_name_plural = 'Избранное'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorites_recipes',
+            )
+        ]
+
+    def __repr__(self):
+        return (
+            f'{self.__cls__.__name__}(user={self.user.username}, '
+            f'recipe={self.recipe.name}, date={self.date})'
+        )
+
+    def __str__(self):
+        return (
+            f'Избранный рецепт {self.recipe.name} пользователя '
+            f'{self.user.username}.'
+        )
+
+
+class ShoppingList(models.Model):
+    user = models.ForeignKey(
+        User,
+        related_name='shopping_list',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name='purchases',
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт'
+    )
+    date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добавления',
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт в списке покупок'
+        verbose_name_plural = 'Рецепты в списке покупок'
+
+    def __str__(self):
+        return (
+            f'Рецепт {self.recipe.name} в списке покупок пользователя '
+            f'{self.user.username}.'
+        )
