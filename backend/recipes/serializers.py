@@ -2,10 +2,34 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from .models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                      ShoppingList, Tag)
+
+from users.serializers import ModifiedDjoserUserSerializer  # isort: skip
+
+
+class TagSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = Tag
+        fields = '__all__'
+        read_only_fields = [
+            'name',
+            'color',
+            'slug',
+        ]
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = [
+            'id',
+            'name',
+            'measurement_unit',
+        ]
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
@@ -25,31 +49,8 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'ingredient',
+            'measurement_unit',
             'amount',
-            'measurement_unit',
-        ]
-
-
-class IngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = [
-            'id',
-            'name',
-            'measurement_unit',
-        ]
-
-
-class TagSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=False)
-
-    class Meta:
-        model = Tag
-        fields = '__all__'
-        read_only_fields = [
-            'name',
-            'color',
-            'slug',
         ]
 
 
@@ -66,15 +67,12 @@ class IngredientsSerializerField(serializers.Field):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
-    )
     image = Base64ImageField()
     ingredients = IngredientsSerializerField(source='*')
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    author = ModifiedDjoserUserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
@@ -104,14 +102,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if request is None or not request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return False
         user = request.user
         return Favorite.objects.filter(recipe=obj, user=user).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if request is None or not request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return False
         user = request.user
         return ShoppingList.objects.filter(recipe=obj, user=user).exists()
@@ -170,35 +168,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         return value
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
+class ShortRecipeReadOnlySerializer(serializers.Serializer):
+    image = Base64ImageField()
+
     class Meta:
-        model = Favorite
+        model = Recipe
         fields = [
-            'user',
-            'recipe',
-        ]
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Favorite.objects.all(),
-                fields=[
-                    'user',
-                    'recipe',
-                ],
-                message='Этот рецепт уже в избранном.',
-            )
-        ]
-
-
-class ShoppingListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShoppingList
-        validators = [
-            UniqueTogetherValidator(
-                queryset=ShoppingList.objects.all(),
-                fields=[
-                    'user',
-                    'recipe',
-                ],
-                message='Этот рецепт уже в списке покупок.',
-            )
+            'id',
+            'name',
+            'image',
+            'cooking_time',
         ]

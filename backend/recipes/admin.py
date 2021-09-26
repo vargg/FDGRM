@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Ingredient, IngredientInRecipe, Recipe, Tag
+from .models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                     ShoppingList, Tag)
 
 
 class IngredientInLine(admin.TabularInline):
@@ -11,25 +12,26 @@ class IngredientInLine(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'text',
         'author',
         'cooking_time',
+        'in_favorites',
     )
     list_display_links = (
         'name',
-        'text',
-        'author',
-        'cooking_time',
     )
     search_fields = (
         'name',
-        'text',
         'author',
-        'cooking_time',
+        'tags',
     )
     inlines = [
         IngredientInLine,
     ]
+
+    def in_favorites(self, obj):
+        return obj.recipe_in_favorite.count()
+
+    in_favorites.short_description = 'В избранном'
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -40,13 +42,9 @@ class TagAdmin(admin.ModelAdmin):
     )
     list_display_links = (
         'name',
-        'color',
-        'slug',
     )
     search_fields = (
         'name',
-        'color',
-        'slug',
     )
 
 
@@ -57,16 +55,44 @@ class IngredientAdmin(admin.ModelAdmin):
     )
     list_display_links = (
         'name',
-        'measurement_unit',
     )
     search_fields = (
         'name',
-        'measurement_unit',
+    )
+
+
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'recipe',
+    )
+    list_display_links = (
+        'user',
+    )
+    search_fields = (
+        'user',
+        'recipe',
+    )
+
+
+class ShoppingListAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'recipe',
+    )
+    list_display_links = (
+        'user',
+    )
+    search_fields = (
+        'user',
+        'recipe',
     )
 
 
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(ShoppingList, ShoppingListAdmin)
 
 admin.site.site_title = admin.site.site_header = 'Админка'

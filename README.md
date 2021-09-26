@@ -1,1 +1,1 @@
-# praktikum_new_diplom
+# описание будет, но потом
