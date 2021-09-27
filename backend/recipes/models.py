@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -60,7 +61,7 @@ class Ingredient(models.Model):
         return f'Ингредиент "{self.name}"'
 
 
-class IngredientInRecipe (models.Model):
+class IngredientInRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
@@ -71,7 +72,9 @@ class IngredientInRecipe (models.Model):
         on_delete=models.CASCADE,
         related_name='all_ingredients',
     )
-    amount = models.IntegerField()
+    amount = models.IntegerField(
+        validators=[MinValueValidator(1), ],
+    )
 
     class Meta():
         constraints = [
@@ -89,7 +92,7 @@ class Recipe(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name='Название',
-        help_text='Придумайте название для рецепта'
+        help_text='Придумайте название для рецепта',
     )
     text = models.TextField(
         verbose_name='Описание',
@@ -98,11 +101,12 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='images/%Y/%m/%d',
         verbose_name='Изображение',
-        help_text='Приложите подходящее фото'
+        help_text='Приложите подходящее фото',
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
-        help_text='Укажите время, необходимое для приготовления'
+        help_text='Укажите время, необходимое для приготовления',
+        validators=[MinValueValidator(1), ],
     )
     author = models.ForeignKey(
         User,
@@ -114,17 +118,17 @@ class Recipe(models.Model):
         Ingredient,
         through='IngredientInRecipe',
         verbose_name='Ингредиенты',
-        help_text='Укажите список требуемых ингредиентов'
+        help_text='Укажите список требуемых ингредиентов',
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тэг',
         help_text='Нужно указать хотя бы один тэг',
-        related_name='recipe',
+        related_name='recipes',
     )
     created = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата добавления'
+        verbose_name='Дата добавления',
     )
 
     class Meta:

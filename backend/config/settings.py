@@ -1,11 +1,13 @@
 import os
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-fkc75q9!_n1d@yk076rj3tauihkd5u)68b74gmo2qrum4-@cjw'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', default=get_random_secret_key())
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', default=True)
 
 ALLOWED_HOSTS = []
 
@@ -37,10 +39,11 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'config.urls'
 AUTH_USER_MODEL = 'users.User'
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,6 +65,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.environ.get('DB_ENGINE'),
+#         'NAME': os.environ.get('DB_NAME'),
+#         'USER': os.environ.get('DB_USER'),
+#         'PASSWORD': os.environ.get('DB_PASSWORD'),
+#         'HOST': os.environ.get('DB_HOST'),
+#         'PORT': os.environ.get('DB_PORT'),
+#     }
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -82,9 +96,7 @@ LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 STATIC_URL = '/static/'

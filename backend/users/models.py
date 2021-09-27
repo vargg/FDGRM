@@ -44,7 +44,7 @@ class Follow(models.Model):
         related_name='followers',
     )
 
-    class Meta():
+    class Meta:
         verbose_name = 'подписку'
         verbose_name_plural = 'Подписки'
         constraints = [

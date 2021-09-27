@@ -3,9 +3,8 @@ from django.shortcuts import get_object_or_404
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 
-from .models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                     ShoppingList, Tag)
-
+from .models import (  # isort: skip
+    Favorite, Ingredient, IngredientInRecipe, Recipe, ShoppingList, Tag)
 from users.serializers import ModifiedDjoserUserSerializer  # isort: skip
 
 
@@ -90,10 +89,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
-        tags_indexes = data.pop('tags')
-        data['tags'] = [
-            {'id': i} for i in tags_indexes
-        ]
+        try:
+            tags_indexes = data.pop('tags')
+        except KeyError:
+            tags_indexes = None
+        if tags_indexes is not None:
+            data['tags'] = [
+                {'id': i} for i in tags_indexes
+            ]
         return super().to_internal_value(data)
 
     def to_representation(self, instance):
@@ -153,22 +156,53 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def validate_ingredients(self, value):
+        if len(value) < 1:
+            raise serializers.ValidationError(
+                'Нужно указать хотя бы один ингредиент.'
+            )
+        all_ingredients_id = list()
         for ingredient in value:
-            if float(ingredient['amount']) <= 0:
+            ingredient_id = ingredient.get('id')
+            ingredient_amount = ingredient.get('amount')
+            if ingredient_id is None or ingredient_amount is None:
+                raise serializers.ValidationError(
+                    'Для ингредиентов необходимо указать номер (id) и '
+                    'количество (amount).'
+                )
+            try:
+                ingredient_id = float(ingredient_id)
+                ingredient_amount = float(ingredient_amount)
+            except ValueError:
+                raise serializers.ValidationError(
+                    'Номер (id) и количество (amount) должны быть числами.'
+                )
+            if ingredient_id in all_ingredients_id:
+                raise serializers.ValidationError(
+                    'Ингредиенты не должны повторятся.'
+                )
+            else:
+                all_ingredients_id.append(ingredient_id)
+            if ingredient_amount <= 0:
                 raise serializers.ValidationError(
                     'Количество должно быть больше 0.'
                 )
         return value
 
     def validate_cooking_time(self, value):
-        if float(value) <= 0:
+        try:
+            cooking_time = float(value)
+        except ValueError:
+            raise serializers.ValidationError(
+                'Время приготовления (cooking_time) должно быть числом.'
+            )
+        if cooking_time <= 0:
             raise serializers.ValidationError(
                 'Время приготовления должно быть больше 0.'
             )
         return value
 
 
-class ShortRecipeReadOnlySerializer(serializers.Serializer):
+class ShortRecipeReadOnlySerializer(serializers.ModelSerializer):
     image = Base64ImageField()
 
     class Meta:

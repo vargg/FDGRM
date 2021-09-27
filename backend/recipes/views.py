@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,13 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .filters import RecipeFilter
-from .models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                     ShoppingList, Tag)
-from .serializers import (IngredientSerializer, RecipeSerializer,
-                          ShortRecipeReadOnlySerializer, TagSerializer)
-
 from config.pagination import ModifiedPageNumberPagination  # isort: skip
+from .filters import RecipeFilter  # isort: skip
+from .models import (  # isort: skip
+    Favorite, Ingredient, IngredientInRecipe, Recipe, ShoppingList, Tag)
+from .serializers import (  # isort: skip
+    IngredientSerializer, RecipeSerializer, ShortRecipeReadOnlySerializer,
+    TagSerializer)
 
 User = get_user_model()
 
@@ -129,16 +128,20 @@ class DownloadShoppingCart(APIView):
     def get(self, request):
         all_ingredients = IngredientInRecipe.objects.filter(
             recipe__recipe_in_shopping_list__user=request.user
+        ).values_list(
+            'ingredient__name',
+            'ingredient__measurement_unit',
+            'amount'
         )
         ingredients_to_buy = dict()
         for item in all_ingredients:
-            name = item.ingredient.name
+            name = item[0]
             if name in ingredients_to_buy:
-                ingredients_to_buy[name]['amount'] += item.amount
+                ingredients_to_buy[name]['amount'] += item[2]
             else:
                 ingredients_to_buy[name] = {
-                    'amount': item.amount,
-                    'measurement_unit': item.ingredient.measurement_unit,
+                    'amount': item[2],
+                    'measurement_unit': item[1],
                 }
         pre_result = [
             f'{key}: {value["amount"]} {value["measurement_unit"]};\n'

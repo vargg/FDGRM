@@ -7,11 +7,11 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Follow
-from .serializers import ModifiedDjoserUserSerializer
-from .utils import subscribe_context
-
 from config.pagination import ModifiedPageNumberPagination  # isort: skip
+from .models import Follow  # isort: skip
+from .serializers import ModifiedDjoserUserSerializer  # isort: skip
+from .utils import subscribe_context  # isort: skip
+
 
 User = get_user_model()
 
