@@ -76,7 +76,7 @@ class IngredientInRecipe(models.Model):
         validators=[MinValueValidator(1), ],
     )
 
-    class Meta():
+    class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=[
