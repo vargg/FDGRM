@@ -2,6 +2,8 @@
 
 ![main workflow](https://github.com/vargg/foodgram-project-react/actions/workflows/fdgrm_workflow.yaml/badge.svg)
 
+http://84.201.173.122/
+
 admin@admin.admin   |   admin
 
 ## Стэк
