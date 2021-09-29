@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from config.pagination import ModifiedPageNumberPagination  # isort: skip
-from .filters import RecipeFilter  # isort: skip
+from .filters import IngredientFilter, RecipeFilter  # isort: skip
 from .models import (  # isort: skip
     Favorite, Ingredient, IngredientInRecipe, Recipe, ShoppingList, Tag)
 from .serializers import (  # isort: skip
@@ -109,6 +109,10 @@ class IngredientView(ReadOnlyModelViewSet):
     permission_classes = [
         AllowAny,
     ]
+    filter_backends = [
+        DjangoFilterBackend,
+    ]
+    filter_class = IngredientFilter
     serializer_class = IngredientSerializer
 
 

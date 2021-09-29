@@ -35,7 +35,8 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(
         source='ingredient.id',
     )
-    ingredient = serializers.SlugRelatedField(
+    name = serializers.SlugRelatedField(
+        source='ingredient',
         slug_field='name',
         queryset=Ingredient.objects.all(),
     )
@@ -47,7 +48,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
         fields = [
             'id',
-            'ingredient',
+            'name',
             'measurement_unit',
             'amount',
         ]
@@ -66,7 +67,7 @@ class IngredientsSerializerField(serializers.Field):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    image = Base64ImageField()
+    image = Base64ImageField(use_url=True)
     ingredients = IngredientsSerializerField(source='*')
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
@@ -132,7 +133,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe = self.Meta.model.objects.create(**validated_data)
         else:
             IngredientInRecipe.objects.filter(recipe=recipe).delete()
-            old_tags = Tag.objects.filter(recipe=recipe)
+            old_tags = Tag.objects.filter(recipes=recipe)
             for tag in old_tags:
                 recipe.tags.remove(tag)
             for key, value in validated_data.items():

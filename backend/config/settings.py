@@ -10,7 +10,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', default=get_random_secret_key()
 DEBUG = os.environ.get('DEBUG', default=False)
 
 ALLOWED_HOSTS = [
-    'web',
+    'backend',
+    '84.201.173.122',
 ]
 
 INSTALLED_APPS = [
@@ -59,7 +60,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 DATABASES = {
     'default': {

@@ -58,7 +58,7 @@ class Ingredient(models.Model):
         )
 
     def __str__(self):
-        return f'Ингредиент "{self.name}"'
+        return f'Ингредиент "{self.name}; {self.measurement_unit}"'
 
 
 class IngredientInRecipe(models.Model):
@@ -105,7 +105,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
-        help_text='Укажите время, необходимое для приготовления',
+        help_text='Укажите время в минутах, необходимое для приготовления',
         validators=[MinValueValidator(1), ],
     )
     author = models.ForeignKey(
