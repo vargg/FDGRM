@@ -4,8 +4,6 @@
 
 http://84.201.173.122/
 
-admin@admin.admin   |   admin
-
 ## Стэк
 [Python](https://www.python.org/) v.3.9, [Django](https://www.djangoproject.com/) v.3.2.7, [Django REST framework](https://www.django-rest-framework.org/) v.3.12.4, [django filter](https://django-filter.readthedocs.io/en/stable/) v.2.4.0, [nginx](https://nginx.org/en/docs/) v.1.20.1, [PostgreSQL](https://www.postgresql.org) v.13.4, [Docker](https://www.docker.com/) v.20.10.8.
 
