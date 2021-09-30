@@ -30,15 +30,15 @@ class RecipeFilter(filters.FilterSet):
 
     def get_is_favorited(self, queryset, name, value):
         user = self.request.user
-        if value:
-            return Recipe.objects.filter(recipe_in_favorite__user=user)
-        return Recipe.objects.all()
+        if value and user.is_authenticated:
+            return queryset.filter(recipe_in_favorite__user=user)
+        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         user = self.request.user
-        if value:
-            return Recipe.objects.filter(recipe_in_shopping_list__user=user)
-        return Recipe.objects.all()
+        if value and user.is_authenticated:
+            return queryset.filter(recipe_in_shopping_list__user=user)
+        return queryset
 
 
 class IngredientFilter(filters.FilterSet):
