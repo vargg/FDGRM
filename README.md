@@ -1,4 +1,4 @@
-# YaMDb.
+# FDGRM.
 
 ![main workflow](https://github.com/vargg/foodgram-project-react/actions/workflows/fdgrm_workflow.yaml/badge.svg)
 
