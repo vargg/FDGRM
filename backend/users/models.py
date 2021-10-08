@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 from django.db import models
+from django.db.models import signals
 
 
 class User(AbstractUser):
@@ -59,3 +62,18 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'{self.user} подписан на {self.author}'
+
+
+def user_post_save(sender, instance, created, *args, **kwargs):
+    if created:
+        send_mail(
+            'Уведомление о прохождении регистрации на FDGRM',
+            f'Привет, {instance.username}! Ты зарегистрировался на нашем '
+            'сайте. Добро пожаловать!',
+            settings.EMAIL_HOST_USER,
+            [instance.email],
+            fail_silently=False,
+        )
+
+
+signals.post_save.connect(user_post_save, sender=User)
