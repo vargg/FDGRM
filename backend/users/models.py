@@ -1,3 +1,5 @@
+import asyncio
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.mail import send_mail
@@ -64,16 +66,19 @@ class Follow(models.Model):
         return f'{self.user} подписан на {self.author}'
 
 
-def user_post_save(sender, instance, created, *args, **kwargs):
+async def user_post_save(sender, instance, created, *args, **kwargs):
     if created:
-        send_mail(
-            'Уведомление о прохождении регистрации на FDGRM',
-            f'Привет, {instance.username}! Ты зарегистрировался на нашем '
-            'сайте. Добро пожаловать!',
-            settings.EMAIL_HOST_USER,
-            [instance.email],
-            fail_silently=False,
+        task = asyncio.create_task(
+            send_mail(
+                'Уведомление о прохождении регистрации на FDGRM',
+                f'Привет, {instance.username}! Ты зарегистрировался на нашем '
+                'сайте. Добро пожаловать!',
+                settings.EMAIL_HOST_USER,
+                [instance.email],
+                fail_silently=False,
+            )
         )
+        await task
 
 
 signals.post_save.connect(user_post_save, sender=User)
