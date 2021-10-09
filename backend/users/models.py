@@ -81,4 +81,4 @@ async def user_post_save(sender, instance, created, *args, **kwargs):
         await task
 
 
-signals.post_save.connect(user_post_save, sender=User)
+signals.post_save.connect(asyncio.run(user_post_save), sender=User)
