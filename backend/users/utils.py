@@ -4,6 +4,7 @@ from recipes.models import Recipe  # isort: skip
 from recipes.serializers import RecipeSerializer  # isort: skip
 from .serializers import ModifiedDjoserUserSerializer  # isort: skip
 
+
 User = get_user_model()
 
 
